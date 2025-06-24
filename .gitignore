@@ -1,0 +1,22 @@
+# Файлы сборки
+/build/
+/cmake-build-debug/
+/cmake-build-release/
+
+# Файлы IDE
+.idea/
+*.suo
+*.user
+
+# Исполняемые файлы
+*.exe
+*.out
+PGUCOIN
+
+# Библиотеки и объектные файлы
+*.a
+*.so
+*.lib
+*.dll
+*.o
+*.obj
