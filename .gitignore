@@ -20,3 +20,4 @@ PGUCOIN
 *.dll
 *.o
 *.obj
+*.dat

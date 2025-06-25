@@ -16,27 +16,29 @@ private:
     Block* NextBlock;
     time_t TimeStamp;
     std::vector<Transaction*> TransactionList;
-    std::string Nonce; // Добавил для демонстрации PoW (пока тут не используем, на будущее)
+    std::string Nonce;
 
 public:
-    // Конструктор
+    // Конструктор для создания нового блока
     Block(int number, Block* prevBlock, const std::vector<Transaction*>& transactions);
+    // Новый конструктор для загрузки блока из файла
+    Block(int number, time_t timestamp, std::string hash, std::string hashMerkle, std::string nonce, Block* prevBlock, const std::vector<Transaction*>& transactions);
 
     // Геттеры
     std::string GetHash() const { return Hash; }
-    int GetNumber() const { return Number; } // Номер блока для вывода в майнинге
+    int GetNumber() const { return Number; }
     Block* GetPrevBlock() const { return PrevBlock; }
     Block* GetNextBlock() const { return NextBlock; }
-    time_t GetTimeStamp() const { return TimeStamp; } // Время создания блока, для контроля за ним
+    time_t GetTimeStamp() const { return TimeStamp; }
     const std::vector<Transaction*>& GetTransactionList() const { return TransactionList; }
-    std::string GetHashMerkle() const { return HashMerkle; } // Добавил для реализации Меркла
+    std::string GetHashMerkle() const { return HashMerkle; }
 
     // Сеттер
-    void SetNextBlock(Block* nextBlock) { NextBlock = nextBlock; } // Для связи между блоками
+    void SetNextBlock(Block* nextBlock) { NextBlock = nextBlock; }
 
-    // Методы для вычисления хешей
+    // Методы
     std::string CalculateHash();
-    static std::string CalculateMerkleRoot(const std::vector<Transaction*>& transactions); // Считаем корень хеша Меркла (взял из статьи)
+    static std::string CalculateMerkleRoot(const std::vector<Transaction*>& transactions);
     std::string ToString() const;
 
     // Деструктор

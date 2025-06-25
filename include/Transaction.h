@@ -21,7 +21,10 @@ private:
     time_t TimeStamp;
 
 public:
+    // Конструктор для новых транзакций
     Transaction(User* SetSender, User* SetReceiver, double SetAmount);
+    // Конструктор для загрузки из файла
+    Transaction(User* SetSender, User* SetReceiver, double SetAmount, time_t timestamp);
 
     // Геттеры
     User* GetSender() const { return Sender; }

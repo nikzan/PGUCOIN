@@ -3,6 +3,7 @@
 #include <ctime>
 #include <limits>
 #include <vector>
+#include <cstdio>
 #include "../include/BlockChain.h"
 #include "../include/AdditionalFunctions.h"
 #include "../include/User.h"
@@ -13,18 +14,17 @@ std::vector<std::string> SecondNames;
 
 void displayMenu() {
     std::cout << "\n--- PGUCOIN Menu ---\n";
-    std::cout << "0. | Mine a Block | \n";
+    std::cout << "0. | Mine a Block | (Auto-saves)\n";
     std::cout << "1. Make a Deposit\n";
     std::cout << "2. Make a Withdrawal\n";
     std::cout << "3. Make a Transfer\n";
     std::cout << "4. View User Balances\n";
     std::cout << "5. View Blockchain\n";
     std::cout << "6. Exit\n";
+    std::cout << "7. Clear Blockchain and Exit\n";
     std::cout << "Enter your choice: ";
 }
 
-// Подсмотрел на стаке, удобно, чтобы не писать две одинаковые под инт и дабл
-// Проверка ввода пользователя
 template<typename T>
 T getValidatedInput(const std::string& prompt) {
     T value;
@@ -42,7 +42,6 @@ T getValidatedInput(const std::string& prompt) {
     }
 }
 
-// Вывод доступных пользователей и выбор
 User* selectUser(const std::vector<User*>& users, const std::string& prompt) {
     if (users.empty()) {
         std::cout << "No users available.\n";
@@ -65,35 +64,41 @@ User* selectUser(const std::vector<User*>& users, const std::string& prompt) {
 
 int main() {
     srand(static_cast<unsigned int>(time(nullptr)));
+    const std::string SAVE_FILE = "pgucoin.dat";
 
     FirstNames = ReadNames("../data/FirstNames.txt");
     SecondNames = ReadNames("../data/SecondNames.txt");
-
     if (FirstNames.empty() || SecondNames.empty()) {
-        std::cerr << "Error: Could not load names. Ensure FirstNames.txt and SecondNames.txt are in the correct directory.\n";
+        std::cerr << "Error: Could not load names...\n";
         return 1;
     }
 
-    BlockChain* PGUCOIN = new BlockChain("PGUCOIN_Network");
+    std::vector<User*> Users;
+
+    BlockChain* PGUCOIN = new BlockChain("PGUCOIN_Network", SAVE_FILE, &Users);
+
     User* Burse = new User(0, "Burse", PGUCOIN);
     PGUCOIN->SetBurse(Burse);
 
-    int CountOfUsers = getValidatedInput<int>("Enter number of initial users (default = 3): ");
-    if (CountOfUsers <= 0) CountOfUsers = 3;
+    if (!PGUCOIN->loadFromFile()) {
+        std::cout << "No saved blockchain found. Creating a new one.\n";
 
-    std::vector<User*> Users;
-    for (int i = 0; i < CountOfUsers; i++){
-        std::string Name;
-        do {
-            Name = GenerationName(FirstNames, SecondNames);
-        } while (!CheckUserName(Users, Name));
+        int CountOfUsers = getValidatedInput<int>("Enter number of initial users (default = 3): ");
+        if (CountOfUsers <= 0) CountOfUsers = 3;
 
-        User* PUser = new User(i + 1, Name, PGUCOIN);
-        Users.push_back(PUser);
-        std::cout << "User created: " << PUser->GetName() << " (ID: " << PUser->GetID() << ")\n";
+        for (int i = 0; i < CountOfUsers; i++){
+            std::string Name;
+            do {
+                Name = GenerationName(FirstNames, SecondNames);
+            } while (!CheckUserName(Users, Name));
+
+            User* PUser = new User(i + 1, Name, PGUCOIN);
+            Users.push_back(PUser);
+            std::cout << "User created: " << PUser->GetName() << " (ID: " << PUser->GetID() << ")\n";
+        }
+
+        PGUCOIN->CreateGenesisBlock({});
     }
-
-    PGUCOIN->CreateGenesisBlock({});
 
     int choice;
     do {
@@ -163,12 +168,23 @@ int main() {
                 break;
             }
             case 6: {
-                std::cout << "Exiting PGUCOIN. Goodbye!\n";
-                break;
+                    // Просто выход.
+                    std::cout << "Exiting PGUCOIN. Goodbye!\n";
+                    break;
+            }
+            case 7: {
+                    if (remove(SAVE_FILE.c_str()) != 0) {
+                        perror("Error deleting file");
+                    } else {
+                        std::cout << "Blockchain data file cleared.\n";
+                    }
+                    std::cout << "Exiting PGUCOIN. Goodbye!\n";
+                    choice = 6;
+                    break;
             }
             default: {
-                std::cout << "Invalid choice. Please try again.\n";
-                break;
+                    std::cout << "Invalid choice. Please try again.\n";
+                    break;
             }
         }
     } while (choice != 6);

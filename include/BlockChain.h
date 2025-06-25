@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 #include "Block.h"
 #include "Pool.h"
@@ -18,12 +19,17 @@ private:
     User* Burse;
 
     std::string Name;
+    std::string SaveFileName;
     int CountBlocks;
+    std::vector<User*>* AllUsers;
 
+    void clearChain();
     bool IsTransactionValid(Transaction* trans) const;
+    bool saveToFile() const;
 
 public:
-    BlockChain(const std::string& name);
+    // Конструктор принимает имя файла и указатель на вектор пользователей
+    BlockChain(const std::string& name, const std::string& saveFileName, std::vector<User*>* users);
     ~BlockChain();
 
     // Геттеры
@@ -40,6 +46,9 @@ public:
     bool MineBlock(int maxTransactions = 10);
     double GetUserBalance(const User* user) const;
     void PrintChain() const;
+
+    // Метод загрузки
+    bool loadFromFile();
 };
 
 #endif
